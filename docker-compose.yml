@@ -1,4 +1,4 @@
-# This is a dev docker-compose file which exports your wiki on localhost:8000
+# This is a dev docker-compose file which exports your wiki on localhost:8087
 version: '3'
 services:
   mediawiki:
@@ -6,6 +6,8 @@ services:
     volumes:
       - ./data/images:/images
       - ./data/config:/config
+    environment:
+      URL_PREFIX:
     ports:
       - 8087:80
     links:
@@ -13,7 +15,7 @@ services:
     depends_on:
       - db
   db:
-    image: "postgres:9.6-alpine"
+    image: "postgres:16.1-alpine"
     environment:
       - POSTGRES_DB=wiki
       - POSTGRES_USER=wiki

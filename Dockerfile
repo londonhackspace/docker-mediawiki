@@ -2,18 +2,19 @@ FROM php:7.4-fpm
 
 RUN apt-get update && \
     apt-get -y install apt-transport-https git curl libmagickwand-6.q16-dev imagemagick libicu-dev \
-               libpq-dev supervisor nginx cron libzip-dev gpg && \
+    libpq-dev supervisor nginx libzip-dev gpg unzip gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pgsql intl zip && \
-	pecl install imagick && docker-php-ext-enable imagick && \
-	pecl install apcu && \
-    	pecl install apcu_bc-1.0.5 && \
-    	docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini && \
-    	docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
+RUN docker-php-ext-install calendar pgsql intl zip && \
+    pecl install imagick && docker-php-ext-enable imagick && \
+    pecl install apcu && \
+    pecl install apcu_bc-1.0.5 && \
+    docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini && \
+    docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
 
-ARG MEDIAWIKI_VERSION_MAJOR=1.34
-ARG MEDIAWIKI_VERSION=1.34.0
+ARG MEDIAWIKI_VERSION_MAJOR=1.39
+ARG MEDIAWIKI_VERSION=1.39.6
+ARG URL_PREFIX
 
 RUN curl -s -o /tmp/keys.txt https://www.mediawiki.org/keys/keys.txt && \
     curl -s -o /tmp/mediawiki.tar.gz https://releases.wikimedia.org/mediawiki/$MEDIAWIKI_VERSION_MAJOR/mediawiki-$MEDIAWIKI_VERSION.tar.gz && \
@@ -29,18 +30,21 @@ RUN curl -s -o /tmp/keys.txt https://www.mediawiki.org/keys/keys.txt && \
     rm -rf /var/www/mediawiki/w/images && \
     ln -s /images /var/www/mediawiki/w/images
 
-RUN curl -s -o /var/www/mediawiki/w/composer.phar https://getcomposer.org/composer.phar
+RUN curl -s -o /var/www/mediawiki/w/composer.phar https://getcomposer.org/download/latest-2.x/composer.phar
 COPY config/composer.local.json /var/www/mediawiki/w/composer.local.json
-RUN cd /var/www/mediawiki/w; php ./composer.phar update --no-dev
+
+RUN cd /var/www/mediawiki/w; COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar update --no-dev
 
 COPY config/php-fpm.conf /usr/local/etc/
 COPY config/supervisord.conf /etc/supervisord.conf
-COPY config/nginx.conf /etc/nginx/nginx.conf
-COPY config/crontab /etc/crontab
+COPY config/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY mwjobrunner.sh /mwjobrunner.sh
 
 RUN ln -s /config/LocalSettings.php /var/www/mediawiki/w/LocalSettings.php
+RUN ln -s /config/smw.json /var/www/mediawiki/w/extensions/SemanticMediaWiki/.smw.json
 
 VOLUME ["/images", "/config"]
 EXPOSE 80
-ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
-CMD []
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
