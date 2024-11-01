@@ -1,0 +1,22 @@
+services:
+  nginx:
+    build: nginx
+    ports:
+      - 0.0.0.0:8050:80
+  wiki:
+    build: .
+    environment:
+      URL_PREFIX:
+    volumes:
+      - ./dev/files/images:/images
+      - ./dev/files/config:/config
+    links:
+      - memcached:memcached
+    restart: unless-stopped
+    logging:
+      driver: journald
+
+  memcached:
+    image: 'memcached:1.6.29'
+    restart: unless-stopped
+    command: memcached -m 128
