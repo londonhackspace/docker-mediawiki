@@ -3,6 +3,8 @@ services:
     build: nginx
     ports:
       - 0.0.0.0:8050:80
+    restart: unless-stopped
+
   wiki:
     build: .
     environment:
