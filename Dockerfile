@@ -41,13 +41,14 @@ COPY config/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY mwjobrunner.sh /mwjobrunner.sh
 
-RUN cd /var/www/mediawiki/w/skins; git clone https://bitbucket.org/wikiskripta/medik.git Medik
+RUN cd /var/www/mediawiki/w/skins; git clone -b v5.0.0 https://github.com/wikiskripta/Medik Medik
 
 RUN ln -s /config/LocalSettings.php /var/www/mediawiki/w/LocalSettings.php
 RUN ln -s /config/smw.json /var/www/mediawiki/w/extensions/SemanticMediaWiki/.smw.json
 
 RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/MobileFrontend
 RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/DeleteBatch
+RUN cd /var/www/mediawiki/w/extensions; git clone https://github.com/mywikis/CrawlerProtection.git
 
 VOLUME ["/images", "/config"]
 EXPOSE 80
