@@ -8,6 +8,7 @@ services:
     volumes:
       - /var/lib/wiki/lhs/images:/images
       - /var/lib/wiki/lhs/config:/config
+      - /var/log/wiki:/var/log
     ports:
       - 8050:80
     links:
