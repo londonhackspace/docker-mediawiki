@@ -1,3 +1,5 @@
+# This is a dev docker-compose file which exports your wiki on localhost:8050
+
 services:
   nginx:
     build: nginx
@@ -14,9 +16,19 @@ services:
       - ./dev/files/config:/config
     links:
       - memcached:memcached
+      - db:db
+    depends_on:
+      - db
     restart: unless-stopped
-    logging:
-      driver: journald
+
+  db:
+    image: "postgres:16.1-alpine"
+    environment:
+      - POSTGRES_DB=hackspacewiki
+      - POSTGRES_USER=hackspacewiki
+      - POSTGRES_PASSWORD=wiki
+    ports:
+      - 0.0.0.0:5482:5432
 
   memcached:
     image: 'memcached:1.6.29'
