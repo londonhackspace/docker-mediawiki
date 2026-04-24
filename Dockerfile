@@ -38,6 +38,7 @@ RUN cd /var/www/mediawiki/w; COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar upda
 COPY config/php-fpm.conf /usr/local/etc/
 COPY config/supervisord.conf /etc/supervisord.conf
 COPY config/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY config/favicon.ico /var/www/mediawiki/favicon.ico
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY mwjobrunner.sh /mwjobrunner.sh
 
