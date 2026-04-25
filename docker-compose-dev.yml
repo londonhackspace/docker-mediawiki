@@ -14,7 +14,8 @@ services:
     volumes:
       - ./dev/files/images:/images
       - ./dev/files/config:/config
-      - ./dev/files/log:/var/log
+      - ./dev/files/log:/var/log      
+      - ./dev/files/log/nginx:/var/log/nginx
     links:
       - memcached:memcached
       - db:db
