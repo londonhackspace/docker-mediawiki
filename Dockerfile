@@ -49,7 +49,7 @@ RUN ln -s /config/smw.json /var/www/mediawiki/w/extensions/SemanticMediaWiki/.sm
 
 RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/MobileFrontend
 RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/DeleteBatch
-RUN cd /var/www/mediawiki/w/extensions; git clone https://github.com/mywikis/CrawlerProtection.git
+RUN cd /var/www/mediawiki/w/extensions; git clone https://github.com/londonhackspace/CrawlerProtection.git
 
 VOLUME ["/images", "/config"]
 EXPOSE 80
