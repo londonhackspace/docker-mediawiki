@@ -1,6 +1,6 @@
 FROM php:7.4-fpm
 
-RUN apt-get update && \
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && cat /etc/apt/sources.list && apt-get update && \
     apt-get -y install apt-transport-https git curl libmagickwand-6.q16-dev imagemagick libicu-dev \
     libpq-dev supervisor nginx libzip-dev gpg unzip gettext-base && \
     rm -rf /var/lib/apt/lists/*
@@ -33,7 +33,7 @@ RUN curl -s -o /tmp/keys.txt https://www.mediawiki.org/keys/keys.txt && \
 RUN curl -s -o /var/www/mediawiki/w/composer.phar https://getcomposer.org/download/latest-2.x/composer.phar
 COPY config/composer.local.json /var/www/mediawiki/w/composer.local.json
 
-RUN cd /var/www/mediawiki/w; COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar update --no-dev
+RUN cd /var/www/mediawiki/w; php ./composer.phar config -g policy.advisories.block false && COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar update --no-dev
 
 COPY config/php-fpm.conf /usr/local/etc/
 COPY config/supervisord.conf /etc/supervisord.conf
