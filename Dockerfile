@@ -1,19 +1,17 @@
-FROM php:7.4-fpm
+FROM php:8.2.35-fpm
 
-RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && cat /etc/apt/sources.list && apt-get update && \
-    apt-get -y install apt-transport-https git curl libmagickwand-6.q16-dev imagemagick libicu-dev \
+RUN apt-get update && \
+    apt-get -y install apt-transport-https git curl libmagickwand-7.q16-dev imagemagick libicu-dev \
     libpq-dev supervisor nginx libzip-dev gpg unzip gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install calendar pgsql intl zip && \
     pecl install imagick && docker-php-ext-enable imagick && \
     pecl install apcu && \
-    pecl install apcu_bc-1.0.5 && \
-    docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini && \
-    docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
+    docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini
 
-ARG MEDIAWIKI_VERSION_MAJOR=1.39
-ARG MEDIAWIKI_VERSION=1.39.6
+ARG MEDIAWIKI_VERSION_MAJOR=1.43
+ARG MEDIAWIKI_VERSION=1.43.11
 ARG URL_PREFIX
 
 RUN curl -s -o /tmp/keys.txt https://www.mediawiki.org/keys/keys.txt && \
@@ -33,7 +31,7 @@ RUN curl -s -o /tmp/keys.txt https://www.mediawiki.org/keys/keys.txt && \
 RUN curl -s -o /var/www/mediawiki/w/composer.phar https://getcomposer.org/download/latest-2.x/composer.phar
 COPY config/composer.local.json /var/www/mediawiki/w/composer.local.json
 
-RUN cd /var/www/mediawiki/w; php ./composer.phar config -g policy.advisories.block false && COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar update --no-dev
+RUN cd /var/www/mediawiki/w; COMPOSER_ALLOW_SUPERUSER=1 php ./composer.phar update --no-dev
 
 COPY config/php-fpm.conf /usr/local/etc/
 COPY config/supervisord.conf /etc/supervisord.conf
@@ -42,13 +40,13 @@ COPY config/favicon.ico /var/www/mediawiki/favicon.ico
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY mwjobrunner.sh /mwjobrunner.sh
 
-RUN cd /var/www/mediawiki/w/skins; git clone -b v5.0.0 https://github.com/wikiskripta/Medik Medik
+RUN cd /var/www/mediawiki/w/skins; git clone -b v5.1.5 https://github.com/wikiskripta/Medik Medik
 
 RUN ln -s /config/LocalSettings.php /var/www/mediawiki/w/LocalSettings.php
 RUN ln -s /config/smw.json /var/www/mediawiki/w/extensions/SemanticMediaWiki/.smw.json
 
-RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/MobileFrontend
-RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_39 https://gerrit.wikimedia.org/r/mediawiki/extensions/DeleteBatch
+RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/MobileFrontend
+RUN cd /var/www/mediawiki/w/extensions; git clone -b REL1_43 https://gerrit.wikimedia.org/r/mediawiki/extensions/DeleteBatch
 RUN cd /var/www/mediawiki/w/extensions; git clone https://github.com/londonhackspace/CrawlerProtection.git
 
 VOLUME ["/images", "/config"]
